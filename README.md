@@ -2,6 +2,8 @@
 
 <img src="https://docs.pisugar.com/img/whisplay_logo@4x-8.png" alt="Whisplay AI Chatbot" width="200" />
 
+**✨ [New Features →](CHANGELOG.md)** | See the latest updates including Translation Mode and Speaker Diarization
+
 This is a pocket-sized AI chatbot device built using a Raspberry Pi Zero 2w. Just press the button, speak, and it talks back—like a futuristic walkie-talkie with a mind of its own.
 
 Test Video Playlist:
