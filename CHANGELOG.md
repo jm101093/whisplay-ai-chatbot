@@ -6,13 +6,13 @@ All notable changes and new features for the Whisplay AI Chatbot project.
 
 ### Added - Translation Mode with Speaker Diarization
 
-#### Voice-Activated Translation Mode (November 2024)
+#### Voice-Activated Translation Mode (November 2025)
 - **Voice Command Activation**: Say "translate mode" to activate, "normal mode" to deactivate
 - **Visual Indicators**: Purple LED (#ff00ff) + 🌍 emoji when translation mode is active
 - **Persistent Mode**: Translation mode stays active between button presses until explicitly deactivated
 - **Exact Phrase Matching**: Uses precise phrase detection to prevent false activations
 
-#### Speaker Diarization System (November 2024)
+#### Speaker Diarization System (November 2025)
 - **Multi-Speaker Detection**: Automatically identifies different speakers in conversations
 - **VAD-Based Segmentation**: Uses Voice Activity Detection to isolate speech segments
 - **Speaker Embeddings**: Utilizes Resemblyzer for voice fingerprinting
@@ -20,7 +20,7 @@ All notable changes and new features for the Whisplay AI Chatbot project.
 - **JSON Output**: Structured output with speaker IDs, timestamps, and segment boundaries
 - **TypeScript Integration**: Node.js wrapper for seamless Python script execution
 
-#### LLM Configuration Improvements (November 2024)
+#### LLM Configuration Improvements (November 2025)
 - **Anti-Reasoning Prompt**: Updated system prompt to prevent LLM from exposing internal reasoning
 - **Translation Capability**: Enhanced multilingual support with translation-focused instructions
 - **Cleaner Responses**: Eliminated verbose chain-of-thought output in user-facing responses
