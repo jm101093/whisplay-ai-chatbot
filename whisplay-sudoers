@@ -1,0 +1,7 @@
+# Allow pi user to control llama-server service without password
+pi ALL=(ALL) NOPASSWD: /bin/systemctl start llama-server
+pi ALL=(ALL) NOPASSWD: /bin/systemctl stop llama-server
+pi ALL=(ALL) NOPASSWD: /bin/systemctl restart llama-server
+pi ALL=(ALL) NOPASSWD: /usr/bin/pkill
+pi ALL=(ALL) NOPASSWD: /usr/bin/lsof
+pi ALL=(ALL) NOPASSWD: /usr/bin/kill

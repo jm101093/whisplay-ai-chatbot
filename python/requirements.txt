@@ -1,0 +1,13 @@
+Pillow
+cairosvg
+numpy
+spidev
+faster-whisper
+TTS
+# Speaker diarization dependencies (air-gapped compatible)
+webrtcvad
+resemblyzer
+scikit-learn
+hdbscan
+soundfile
+scipy

@@ -1,0 +1,18 @@
+[Unit]
+Description=Llama.cpp Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/whisplay-ai-chatbot
+ExecStart=/bin/bash /home/pi/whisplay-ai-chatbot/run_llama_cpp.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/home/pi/whisplay-ai-chatbot/llama.log
+StandardError=append:/home/pi/whisplay-ai-chatbot/llama.log
+TimeoutStartSec=60
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,19 @@
+[Unit]
+Description=Whisplay AI Chatbot
+After=network-online.target llama-server.service sound.target
+Wants=network-online.target llama-server.service sound.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/whisplay-ai-chatbot
+ExecStartPre=/bin/sleep 30
+ExecStart=/home/pi/.nvm/versions/node/v20.19.5/bin/node /home/pi/whisplay-ai-chatbot/dist/index.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/home/pi/whisplay-ai-chatbot/chatbot.log
+StandardError=append:/home/pi/whisplay-ai-chatbot/chatbot.log
+TimeoutStartSec=90
+
+[Install]
+WantedBy=multi-user.target
