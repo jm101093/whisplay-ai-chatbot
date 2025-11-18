@@ -11,6 +11,7 @@ import {
   recognizeAudio,
   chatWithLLMStream,
   ttsProcessor,
+  translateWithDiarization,
 } from "../cloud-api/server";
 import { extractEmojis } from "../utils";
 import { StreamResponser } from "./StreamResponsor";
@@ -26,7 +27,6 @@ class ChatFlow {
   partialThinking: string = "";
   thinkingSentences: string[] = [];
   answerId: number = 0;
-  hasAnswerStarted: boolean = false;
   translateMode: boolean = false;
 
   constructor() {
@@ -37,12 +37,6 @@ class ChatFlow {
       ttsProcessor,
       (sentences: string[]) => {
         if (this.currentFlowName !== "answer") return;
-        // Clear thinking display when first answer arrives
-        if (!this.hasAnswerStarted) {
-          this.hasAnswerStarted = true;
-          this.partialThinking = "";
-          this.thinkingSentences = [];
-        }
         const fullText = sentences.join(" ");
         display({
           status: "answering",
@@ -68,15 +62,20 @@ class ChatFlow {
     answerId: number
   ): void => {
     if (this.currentFlowName !== "answer" || answerId < this.answerId) return;
-    // Stream thinking tokens in real-time without buffering
     this.partialThinking += partialThinking;
-    display({
-      status: "Thinking",
-      emoji: "🤔",
-      text: this.partialThinking,
-      RGB: "#ff6800", // orange
-      scroll_speed: 6,
-    });
+    const { sentences, remaining } = splitSentences(this.partialThinking);
+    if (sentences.length > 0) {
+      this.thinkingSentences.push(...sentences);
+      const displayText = this.thinkingSentences.join(" ");
+      display({
+        status: "Thinking",
+        emoji: "🤔",
+        text: displayText,
+        RGB: "#ff6800", // yellow
+        scroll_speed: 6,
+      });
+    }
+    this.partialThinking = remaining;
   };
 
   setCurrentFlow = (flowName: string): void => {
@@ -90,13 +89,11 @@ class ChatFlow {
         onButtonReleased(noop);
         display({
           status: "idle",
-          emoji: this.translateMode ? "🌍" : "😴",
-          RGB: this.translateMode ? "#ff00ff" : "#000055",
+          emoji: "😴",
+          RGB: "#000055",
           ...(getCurrentStatus().text === "Listening..."
             ? {
-                text: this.translateMode 
-                  ? "Translate Mode\nPress to record" 
-                  : "Press the button to start",
+                text: "Press the button to start",
               }
             : {}),
         });
@@ -147,7 +144,7 @@ class ChatFlow {
             if (result) {
               console.log("Audio recognized result:", result);
               
-              // Check for translate mode activation (must be exact phrase, not part of sentence)
+              // Check for translate mode activation (exact phrase)
               const lowerResult = result.toLowerCase().trim();
               const isTranslateModeCommand = 
                 lowerResult === "translate mode" ||
@@ -162,14 +159,14 @@ class ChatFlow {
                   status: "idle",
                   emoji: "🌍",
                   RGB: "#ff00ff", // Purple for translate mode
-                  text: "Translate Mode Active\nPress to record conversation",
+                  text: "Translate Mode Active",
                 });
                 console.log("✓ Translate mode activated");
                 setTimeout(() => this.setCurrentFlow("sleep"), 2000);
                 return;
               }
               
-              // Check for translate mode deactivation (must be exact phrase)
+              // Check for translate mode deactivation (exact phrase)
               const isNormalModeCommand =
                 lowerResult === "normal mode" ||
                 lowerResult === "chat mode" ||
@@ -192,7 +189,13 @@ class ChatFlow {
               
               this.asrText = result;
               display({ status: "recognizing", text: result });
-              this.setCurrentFlow("answer");
+              
+              // Route to translate or answer flow based on mode
+              if (this.translateMode) {
+                this.setCurrentFlow("translate");
+              } else {
+                this.setCurrentFlow("answer");
+              }
             } else {
               this.setCurrentFlow("sleep");
             }
@@ -218,7 +221,6 @@ class ChatFlow {
         } = this.streamResponser;
         this.partialThinking = "";
         this.thinkingSentences = [];
-        this.hasAnswerStarted = false;
         chatWithLLMStream(
           [
             {
@@ -246,6 +248,47 @@ class ChatFlow {
         });
         onButtonPressed(() => {
           stopPlaying();
+          this.setCurrentFlow("listening");
+        });
+        onButtonReleased(noop);
+        break;
+      case "translate":
+        display({
+          RGB: "#ff00ff", // Purple for translate mode
+          emoji: "🌐",
+          text: "Translating...",
+        });
+        this.currentFlowName = "translate";
+        this.answerId += 1;
+        const translateAnswerId = this.answerId;
+        onButtonPressed(() => {
+          this.setCurrentFlow("listening");
+        });
+        onButtonReleased(noop);
+        const {
+          partial: translatePartial,
+          endPartial: translateEndPartial,
+          getPlayEndPromise: translateGetPlayEndPromise,
+          stop: stopTranslating,
+        } = this.streamResponser;
+        
+        // Run translation with diarization workflow
+        translateWithDiarization(
+          this.currentRecordFilePath,
+          (text) => translatePartial(text, translateAnswerId),
+          () => translateEndPartial(translateAnswerId),
+          (partialThinking) =>
+            this.partialThinkingCallback(partialThinking, translateAnswerId)
+        );
+        
+        translateGetPlayEndPromise().then(() => {
+          if (this.currentFlowName === "translate") {
+            this.setCurrentFlow("sleep");
+          }
+        });
+        
+        onButtonPressed(() => {
+          stopTranslating();
           this.setCurrentFlow("listening");
         });
         onButtonReleased(noop);

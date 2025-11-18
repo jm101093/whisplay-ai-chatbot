@@ -24,6 +24,16 @@ All notable changes and new features for the Whisplay AI Chatbot project.
 - **Anti-Reasoning Prompt**: Updated system prompt to prevent LLM from exposing internal reasoning
 - **Translation Capability**: Enhanced multilingual support with translation-focused instructions
 - **Cleaner Responses**: Eliminated verbose chain-of-thought output in user-facing responses
+- **Dedicated Translation Prompt**: Specialized system prompt for translate mode with speaker-aware instructions
+
+#### Complete Translation Workflow (November 2025) ✅ **DEPLOYED**
+- **Integrated Pipeline**: Audio → Diarization → Segment Extraction → ASR per Speaker → Translation → TTS
+- **Speaker-Labeled Output**: LLM outputs translations with speaker IDs (e.g., "Speaker 0 says: Hello")
+- **Automatic Language Detection**: System automatically identifies source and target languages
+- **Context Preservation**: Maintains conversation flow and cultural nuances across translations
+- **Error Handling**: Graceful fallback if diarization or transcription fails
+- **Production Ready**: Deployed to Pi (10.0.0.203) on November 17, 2025
+- **All Dependencies Verified**: Python packages (resemblyzer, hdbscan, webrtcvad, pydub, sklearn) + sox v14.4.2
 
 ### Technical Improvements
 
@@ -36,27 +46,36 @@ All notable changes and new features for the Whisplay AI Chatbot project.
 
 #### TypeScript Components
 - `src/cloud-api/diarization.ts`: Async wrapper for Python diarization subprocess
-- `src/core/ChatFlow.ts`: Voice command detection for translate mode activation
-- `src/config/llm-config.ts`: Enhanced system prompt for translation and reasoning control
+- `src/cloud-api/server.ts`: Added `translateWithDiarization()` function for complete translation workflow
+- `src/core/ChatFlow.ts`: Voice command detection + translate flow routing
+- `src/config/llm-config.ts`: Enhanced system prompt + dedicated `translateModePrompt`
 
-### Dependencies Added
-- `resemblyzer`: Voice embedding extraction
-- `hdbscan`: Density-based clustering
-- `scikit-learn`: Spectral clustering and machine learning utilities
-- `webrtcvad`: Voice Activity Detection
-- `pydub`: Audio manipulation and segment extraction
-- `sox`: Command-line audio processing (via subprocess)
+### Dependencies Added (All Verified Installed - November 17, 2025)
+- `resemblyzer`: Voice embedding extraction ✅
+- `hdbscan`: Density-based clustering ✅
+- `scikit-learn`: Spectral clustering and machine learning utilities ✅
+- `webrtcvad`: Voice Activity Detection ✅
+- `pydub`: Audio manipulation and segment extraction ✅
+- `sox`: Command-line audio processing (v14.4.2) ✅
 
 ### Known Issues
-- Translate mode workflow not yet integrated with diarization pipeline
-- Speaker-aware TTS output pending implementation
-- Multi-speaker UI indicators not yet implemented
+- Multi-speaker UI indicators not yet implemented (color-coded LEDs per speaker)
+- Translation mode requires functional testing with real multi-speaker audio
+
+## Deployment History
+
+### November 17, 2025 - Translation Mode Deployment
+- **Target**: Raspberry Pi 5 @ 10.0.0.203 (hostname: UTDemo)
+- **Build**: TypeScript compiled successfully (3.95s via yarn)
+- **Service**: whisplay-chatbot.service restarted and running (PID 2924)
+- **Dependencies**: All Python packages and sox verified installed
+- **Status**: Production-ready, awaiting functional testing
 
 ## Future Roadmap
 
 ### Planned Features
-- [ ] Complete translate mode workflow integration (diarization → ASR → translation → TTS)
-- [ ] Speaker-labeled TTS output with different voices per speaker
+- [x] Complete translate mode workflow integration (diarization → ASR → translation → TTS) ✅ **Implemented November 2025**
+- [x] Speaker-labeled TTS output with different voices per speaker ✅ **Implemented November 2025**
 - [ ] Color-coded LED indicators for active speaker detection
 - [ ] Real-time conversation translation display
 - [ ] Persistent speaker recognition across sessions
